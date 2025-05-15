@@ -44,13 +44,17 @@ def generate_content(keyword):
     log(f"Generating content for '{keyword}' ...")
     prompt = f"Write a detailed, SEO optimized blog post about '{keyword}'. Include headings and subheadings."
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
+        client = openai.OpenAI()
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=1200,
             temperature=0.7
         )
-        content = response.choices[0].text.strip()
+        content = response.choices[0].message.content.strip()
         log(f"Content generated for '{keyword}'.")
         return content
     except Exception as e:
@@ -101,4 +105,5 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
