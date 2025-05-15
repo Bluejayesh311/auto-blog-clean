@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from pytrends.request import TrendReq
-from openai import OpenAI
+import openai
 import requests
 from requests.auth import HTTPBasicAuth
 import threading
@@ -10,11 +10,11 @@ import os
 app = Flask(__name__)
 app.secret_key = 'replace_this_with_a_secure_random_key'
 
-# Initialize OpenAI client with your API key from environment
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Configure OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# WordPress credentials from environment variables
-WP_URL = os.getenv('WP_URL')          # e.g. https://yourdomain.com/wp-json/wp/v2/posts
+# WordPress credentials from environment
+WP_URL = os.getenv('WP_URL')
 WP_USER = os.getenv('WP_USER')
 WP_APP_PASSWORD = os.getenv('WP_APP_PASSWORD')
 
@@ -46,11 +46,9 @@ def generate_content(keyword):
     log(f"Generating content for '{keyword}' ...")
     prompt = f"Write a detailed, SEO optimized blog post about '{keyword}'. Include headings and subheadings."
     try:
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
+            messages=[{"role": "user", "content": prompt}],
             max_tokens=1200,
             temperature=0.7
         )
@@ -66,7 +64,7 @@ def post_to_wordpress(title, content):
     post_data = {
         'title': title,
         'content': content,
-        'status': 'publish'  # use 'draft' if you want to review posts first
+        'status': 'publish'
     }
     try:
         response = requests.post(
@@ -105,6 +103,7 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
